@@ -1,0 +1,31 @@
+.post__form{
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+    padding: 10px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+.post__form input{
+    flex: 1;
+    padding: 5px;
+    height: 10px;
+    border: none;
+    outline: none;
+}
+
+.post__form > div{
+    display: flex;
+    width: 100%;
+    justify-content: flex-end;
+}
+
+.post__form button{
+    padding: 5px 8px;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    background-color: cadetblue;
+    color: azure;
+}
+

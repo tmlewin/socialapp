@@ -1,0 +1,38 @@
+.sidebar{
+    flex: 1;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+    border-radius: 12px;
+    margin-left: 20px;
+    padding: 10px;
+}
+
+.sidebar h2{
+    font-weight: 100;
+}
+
+.sidebar p{
+    font-weight: 100;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar p span{
+    background-color: grey;
+    margin-right: 10px;
+    min-width: 30px;
+    height: 30px;
+    display: block;
+    border-radius: 50%;
+    border: 1.5px solid white;
+    position: relative;
+}
+
+.sidebar p span:before {
+    content: " ";
+    position: absolute;
+    z-index: -1;
+    border-radius: 50%;
+    inset: -3.5px;
+    border: 2px solid rgb(182, 85, 85);
+  }

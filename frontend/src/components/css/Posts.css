@@ -1,0 +1,53 @@
+.post{
+    margin: 10px 0;
+    background-color: white;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+    padding: 10px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.post__details{
+    display: flex;
+    align-items: center;
+}
+
+.post h3{
+    font-weight: 300;
+}
+
+.btns{
+    display: flex;
+    justify-content: space-between;
+}
+
+button{
+    margin-left: 10px;
+}
+
+.btn-delete{
+    background-color: rgb(218, 84, 110);
+    color: white;
+    border: none;
+    outline: none;
+    padding: 5px 8px;
+    border-radius: 10px;
+}
+
+.btn-edit{
+    background-color: grey;
+    color: white;
+    border: none;
+    outline: none;
+    padding: 5px 8px;
+    border-radius: 10px;
+}
+
+.avatar{
+    width: 40px;
+    height: 40px;
+    border-radius: 35%;
+    margin-right: 20px;
+}
