@@ -9,7 +9,7 @@ export default function CreatePost() {
     const [updater, setUpdater] = useContext(updateContext)
 
     const [post, setPost] = useState('');
-    const user = {_id: '123', username: 'Thomas'}
+    const user = {_id: '123', username: 'thomas'}
 
     const handleSend = () =>{
         const postData = {
