@@ -6,7 +6,7 @@ import './css/Posts.css'
 export default function Posts() {
 
     const [updater, setUpdater] = useContext(updateContext)
-    const user = {_id: '123', username: 'thomas'}
+    const user = {_id: '123', username: 'tannerkc'}
 
     const [posts, setPosts] = useState(null)
 
