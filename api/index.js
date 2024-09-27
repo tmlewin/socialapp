@@ -1,27 +1,34 @@
-const mongoose = require('mongoose')
-const app =require('express')()
-const bp = require('body-parser')
-const port = process.env.PORT || 8080
-const authRoutes = require('./routes/auth')
-const postRoutes = require('./routes/posts')
+require('dotenv').config({ path: '.env' });
+const mongoose = require('mongoose');
+const express = require('express');
+const cors = require('cors');
+const bp = require('body-parser');
+const authRoutes = require('./routes/auth');
+const postRoutes = require('./routes/posts');
+const connectDB = require('./config/db');
 
+const app = express();
+const port = process.env.PORT || 8080;
 
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+// Connect to MongoDB
+connectDB();
 
-app.use(require('cors')())
-app.use(bp.urlencoded({extended: true}))
-app.use(bp.json())
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/posts', postRoutes);
 
-mongoose.connect("mongodb+srv://admin:admin@cluster0.u6a8g.mongodb.net/socialapp?retryWrites=true&w=majority",{useNewUrlParser:true, useUnifiedTopology: true},
-() =>{
-    console.log("connected to mongodb")
-}
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+});
 
-)
-app.use('/api/auth', authRoutes)
-app.use('/api/posts', postRoutes)
-app.listen(port,()=>{
-    console.log(`listening on port ${port}`)
-
-})
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
 

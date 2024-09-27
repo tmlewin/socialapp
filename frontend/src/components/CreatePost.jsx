@@ -1,42 +1,52 @@
+import React, { useState } from 'react';
 import axios from '../axios';
-import React, { useContext, useState } from 'react'
-import './css/PostForm.css'
-import {v4 as uuidv4} from 'uuid';
-import { updateContext } from '../context/updateContext';
+import './css/CreatePost.css';
+import { Share2 } from 'lucide-react';
 
-export default function CreatePost() {
+export default function CreatePost({ onPostCreated }) {
+    const [title, setTitle] = useState('');
+    const [content, setContent] = useState('');
 
-    const [updater, setUpdater] = useContext(updateContext)
-
-    const [post, setPost] = useState('');
-    const user = {_id: '123', username: 'tannerkc'}
-
-    const handleSend = () =>{
-        const postData = {
-            userId: user._id,
-            user: user.username,
-            postId: uuidv4(),
-            content: post
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const user = JSON.parse(localStorage.getItem('user'));
+            const response = await axios.post('/api/posts', {
+                title,
+                content,
+                userId: user._id,
+                user: user.username,
+                userProfilePicture: user.profilePicture || "https://via.placeholder.com/40"
+            });
+            onPostCreated(response.data);
+            setTitle('');
+            setContent('');
+        } catch (error) {
+            console.error('Error creating post:', error);
         }
-        
-        axios.post('/api/posts', postData)
-
-        setPost('')
-        setUpdater((state)=>state + 1)
-    }
+    };
 
     return (
-        <div className="post__form">
-            <input 
-                type="text" 
-                placeholder="Tell us what's on your mind..." 
-                value={post}
-                onChange={(e)=>setPost(e.target.value)}
-                maxLength={140}
-            />
-            <div>
-                <button onClick={handleSend}>Send</button>
-            </div>
+        <div className="create-post">
+            <h2>Create a Post</h2>
+            <form onSubmit={handleSubmit}>
+                <input
+                    type="text"
+                    placeholder="Title (Optional)"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                />
+                <textarea
+                    placeholder="What's on your mind?"
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    required
+                />
+                <div className="post-actions">
+                    <Share2 size={20} />
+                    <button type="submit" className="post-button" style={{ backgroundColor: 'black', color: 'white' }}>Post</button>
+                </div>
+            </form>
         </div>
-    )
+    );
 }

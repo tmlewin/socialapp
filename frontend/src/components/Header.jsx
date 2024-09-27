@@ -1,14 +1,19 @@
 import React from 'react'
 import './css/Header.css'
+import { Bell, User, LogOut } from 'lucide-react';
 
-export default function Header() {
+export default function Header({ onLogout }) {
     return (
-        <div className="header">
-            <h2>Socially Social</h2>
-            <p onClick={()=>{
-                localStorage.removeItem('user')
-                window.location.reload();
-            }}>Logout</p>
-        </div>
-    )
+        <header className="header">
+            <h1>Socially Social</h1>
+            <div className="header-actions">
+                <Bell size={24} />
+                <User size={24} />
+                <button onClick={onLogout} className="logout-btn">
+                    <LogOut size={24} />
+                    Logout
+                </button>
+            </div>
+        </header>
+    );
 }

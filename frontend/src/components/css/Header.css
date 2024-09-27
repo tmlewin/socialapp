@@ -1,21 +1,29 @@
-.header{
-    width: 100vw;
-    text-align: center;
-    padding: 10px;
-    background-color: white;
-    box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
-    position: fixed;
-    top: 0;
-    left: 0;
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.header h1 {
+    font-size: 24px;
+    color: #333;
+}
+
+.header-actions {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 20px;
 }
 
-.header h2{
-    font-weight: 100;
-}
-
-.header p{
+.logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: none;
     cursor: pointer;
+    color: #333;
 }

@@ -1,0 +1,49 @@
+.create-post {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.create-post h2 {
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.create-post form {
+    display: flex;
+    flex-direction: column;
+}
+
+.create-post input,
+.create-post textarea {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.create-post textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.post-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.post-button {
+    background-color: black;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+/* Removed hover effect */
