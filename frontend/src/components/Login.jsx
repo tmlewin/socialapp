@@ -11,9 +11,14 @@ const Login = ({ onLogin }) => {
         setError('');
         try {
             const response = await axios.post('/api/auth/login', { username, password });
-            localStorage.setItem('user', JSON.stringify(response.data));
-            onLogin(response.data);
+            const userDataToStore = {
+                ...response.data.user,
+                token: response.data.token
+            };
+            localStorage.setItem('user', JSON.stringify(userDataToStore));
+            onLogin(userDataToStore);
         } catch (err) {
+            console.error('Login error:', err.response?.data || err.message);
             setError('Invalid username or password');
         }
     };

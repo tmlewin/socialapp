@@ -6,6 +6,7 @@ const bp = require('body-parser');
 const authRoutes = require('./routes/auth');
 const postRoutes = require('./routes/posts');
 const threadRoutes = require('./routes/threads');
+const profileRoutes = require('./routes/profile');
 const connectDB = require('./config/db');
 
 const app = express();
@@ -23,6 +24,7 @@ connectDB();
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/threads', threadRoutes);
+app.use('/api/users', profileRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

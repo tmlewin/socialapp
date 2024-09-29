@@ -11,7 +11,7 @@ const ThreadList = ({ threads }) => {
                         <h2>{thread.title}</h2>
                     </Link>
                     <p>Created by: {thread.user}</p>
-                    <p>Posts: {thread.postCount}</p>
+                    <p>Posts: {thread.postCount || 0}</p>
                 </div>
             ))}
         </div>

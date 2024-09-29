@@ -11,6 +11,7 @@ export default function Header({ onLogout }) {
                 <Link to="/">Home</Link>
                 <Link to="/forum">Forum</Link>
                 <Link to="/threads">Threads</Link>
+                <Link to="/profile">Profile</Link>
             </nav>
             <div className="header-actions">
                 <Bell size={24} />

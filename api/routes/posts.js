@@ -4,6 +4,7 @@ const Post = require('../models/Post');
 const User = require('../models/User');
 const Comment = require('../models/Comment');
 const Thread = require('../models/Thread');
+const auth = require('../middleware/auth');
 
 // Get all posts
 router.get('/', async (req, res) => {
@@ -36,12 +37,29 @@ router.get('/search', async (req, res) => {
 });
 
 // Create a new post
-router.post('/', async (req, res) => {
-    const newPost = new Post(req.body);
+router.post('/', auth, async (req, res) => {
+    const { title, content, threadId } = req.body;
+    const userId = req.user.id;
+
     try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const newPost = new Post({
+            title,
+            content,
+            threadId,
+            userId,
+            user: user.username,
+        });
+
         const savedPost = await newPost.save();
+        
         // Increment the post count for the thread
-        await Thread.findByIdAndUpdate(req.body.threadId, { $inc: { postCount: 1 } });
+        await Thread.findByIdAndUpdate(threadId, { $inc: { postCount: 1 } });
+
         res.status(201).json(savedPost);
     } catch (err) {
         res.status(500).json({ message: 'Error creating post', error: err.message });
@@ -49,20 +67,24 @@ router.post('/', async (req, res) => {
 });
 
 // Update a post
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
-        if (post.userId.toString() === req.body.userId) {
-            const updatedPost = await Post.findByIdAndUpdate(req.params.id, 
-                { $set: req.body },
-                { new: true }
-            );
-            res.status(200).json(updatedPost);
-        } else {
-            res.status(403).json("You can update only your post");
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
         }
+
+        // Check if the user is the owner of the post
+        if (post.userId.toString() !== req.user.id) {
+            return res.status(403).json({ message: 'You do not have permission to edit this post' });
+        }
+
+        post.content = req.body.content;
+        const updatedPost = await post.save();
+        res.json(updatedPost);
     } catch (err) {
-        res.status(500).json(err);
+        console.error('Error updating post:', err);
+        res.status(500).json({ message: 'Server error', error: err.message });
     }
 });
 

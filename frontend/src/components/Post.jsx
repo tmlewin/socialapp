@@ -66,20 +66,20 @@ export default function Post({ post, onPostUpdate, onPostDelete }) {
 
     const handleUpdatePost = async () => {
         try {
-            const user = JSON.parse(localStorage.getItem('user'));
             const response = await axios.put(`/api/posts/${localPost._id}`, {
                 content: editedContent,
-                userId: user._id
+                userId: localPost.userId // Ensure this is the correct user ID
             });
-            const updatedPost = response.data;
-            setLocalPost(updatedPost);
-            if (typeof onPostUpdate === 'function') {
-                onPostUpdate(updatedPost);
-            }
+            setLocalPost(response.data);
             setEditingPost(false);
-            setEditedContent('');
+            onPostUpdate(response.data);
         } catch (error) {
             console.error('Error updating post:', error);
+            if (error.response && error.response.status === 403) {
+                alert('You do not have permission to edit this post.');
+            } else {
+                alert('An error occurred while updating the post. Please try again.');
+            }
         }
     };
 
