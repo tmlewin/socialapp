@@ -1,0 +1,32 @@
+.search-bar {
+    display: flex;
+    align-items: center;
+    background-color: #f0f2f5;
+    border-radius: 24px;
+    padding: 8px 16px;
+    margin-bottom: 20px;
+    transition: background-color 0.3s ease;
+}
+
+.search-bar:focus-within {
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.search-icon {
+    color: #65676b;
+    margin-right: 8px;
+}
+
+.search-bar input {
+    flex-grow: 1;
+    background: none;
+    border: none;
+    font-size: 16px;
+    outline: none;
+    color: #050505;
+}
+
+.search-bar input::placeholder {
+    color: #65676b;
+}

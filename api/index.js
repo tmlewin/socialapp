@@ -5,6 +5,7 @@ const cors = require('cors');
 const bp = require('body-parser');
 const authRoutes = require('./routes/auth');
 const postRoutes = require('./routes/posts');
+const threadRoutes = require('./routes/threads');
 const connectDB = require('./config/db');
 
 const app = express();
@@ -21,6 +22,7 @@ connectDB();
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
+app.use('/api/threads', threadRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

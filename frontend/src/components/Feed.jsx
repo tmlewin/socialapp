@@ -1,30 +1,47 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import axios from '../axios';
 import { updateContext } from '../context/updateContext';
-import CreatePost from './CreatePost';
 import Post from './Post';
+import SearchBar from './SearchBar';
 import './css/Feed.css';
 
 export default function Feed() {
     const [posts, setPosts] = useState([]);
+    const [filteredPosts, setFilteredPosts] = useState([]);
     const [updater, setUpdater] = useContext(updateContext);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         fetchPosts();
     }, [updater]);
 
     const fetchPosts = async () => {
+        setIsLoading(true);
+        setError(null);
         try {
             const response = await axios.get('/api/posts');
-            setPosts(response.data); // The posts are already sorted on the server
+            setPosts(response.data);
+            setFilteredPosts(response.data);
         } catch (error) {
             console.error("Error fetching posts:", error);
+            setError("Failed to fetch posts. Please try again later.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    const handlePostCreated = (newPost) => {
-        setPosts(prevPosts => [newPost, ...prevPosts]);
-    };
+    const handleSearch = useCallback((searchTerm) => {
+        if (!searchTerm.trim()) {
+            setFilteredPosts(posts);
+        } else {
+            const filtered = posts.filter(post =>
+                post.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                post.title.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            setFilteredPosts(filtered);
+        }
+    }, [posts]);
 
     const handlePostUpdate = (updatedPost) => {
         setPosts(prevPosts => {
@@ -41,11 +58,13 @@ export default function Feed() {
 
     return (
         <div className="feed">
-            <CreatePost onPostCreated={handlePostCreated} />
-            {posts.map(post => (
+            <SearchBar onSearch={handleSearch} />
+            {isLoading && <p>Loading...</p>}
+            {error && <p className="error-message">{error}</p>}
+            {filteredPosts.map(post => (
                 <Post 
                     key={post._id} 
-                    post={post} 
+                    post={post}
                     onPostUpdate={handlePostUpdate}
                     onPostDelete={handlePostDelete}
                 />

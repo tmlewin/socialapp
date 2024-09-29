@@ -25,6 +25,11 @@ const PostSchema = new mongoose.Schema(
         type: String,
         default: "https://via.placeholder.com/40"
     },
+    threadId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Thread',
+        required: true
+    },
     img: String,
     likes: {
         type: Array,

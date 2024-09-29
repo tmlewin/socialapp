@@ -1,0 +1,31 @@
+.thread-list {
+    margin-top: 20px;
+}
+
+.thread-item {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.thread-item h2 {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+}
+
+.thread-item p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #6c757d;
+}
+
+.thread-item a {
+    text-decoration: none;
+    color: #007bff;
+}
+
+.thread-item a:hover {
+    text-decoration: underline;
+}

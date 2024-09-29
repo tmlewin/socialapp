@@ -1,0 +1,47 @@
+.threads-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.threads-page h1 {
+    margin-bottom: 20px;
+}
+
+.thread-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.thread-item {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 5px;
+    padding: 15px;
+    transition: box-shadow 0.3s ease;
+}
+
+.thread-item:hover {
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.thread-item h2 {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+}
+
+.thread-item p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #6c757d;
+}
+
+.thread-item a {
+    text-decoration: none;
+    color: #007bff;
+}
+
+.thread-item a:hover {
+    text-decoration: underline;
+}

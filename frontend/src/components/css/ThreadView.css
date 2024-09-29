@@ -1,0 +1,15 @@
+.thread-view {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.thread-view h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.thread-view p {
+    color: #6c757d;
+    margin-bottom: 20px;
+}

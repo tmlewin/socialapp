@@ -3,6 +3,7 @@ const router = express.Router();
 const Post = require('../models/Post');
 const User = require('../models/User');
 const Comment = require('../models/Comment');
+const Thread = require('../models/Thread');
 
 // Get all posts
 router.get('/', async (req, res) => {
@@ -10,20 +11,40 @@ router.get('/', async (req, res) => {
         const posts = await Post.find().sort({ createdAt: -1 });
         res.status(200).json(posts);
     } catch (err) {
-        console.error("Error fetching posts:", err);
-        res.status(500).json({ message: "Server error", error: err.message });
+        res.status(500).json(err);
+    }
+});
+
+// Search posts
+router.get('/search', async (req, res) => {
+    try {
+        const { q } = req.query;
+        if (!q) {
+            return res.status(400).json({ message: 'Search query is required' });
+        }
+        const posts = await Post.find({
+            $or: [
+                { title: { $regex: q, $options: 'i' } },
+                { content: { $regex: q, $options: 'i' } }
+            ]
+        }).sort({ createdAt: -1 });
+        res.json(posts);
+    } catch (error) {
+        console.error('Search error:', error);
+        res.status(500).json({ message: 'Error searching posts', error: error.message });
     }
 });
 
 // Create a new post
 router.post('/', async (req, res) => {
+    const newPost = new Post(req.body);
     try {
-        const newPost = new Post(req.body);
         const savedPost = await newPost.save();
+        // Increment the post count for the thread
+        await Thread.findByIdAndUpdate(req.body.threadId, { $inc: { postCount: 1 } });
         res.status(201).json(savedPost);
     } catch (err) {
-        console.error("Error creating post:", err);
-        res.status(500).json({ message: "Server error", error: err.message });
+        res.status(500).json({ message: 'Error creating post', error: err.message });
     }
 });
 
@@ -31,38 +52,75 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
-        if (!post) {
-            return res.status(404).json({ message: "Post not found" });
-        }
         if (post.userId.toString() === req.body.userId) {
-            await post.updateOne({ $set: req.body });
-            const updatedPost = await Post.findById(req.params.id);
+            const updatedPost = await Post.findByIdAndUpdate(req.params.id, 
+                { $set: req.body },
+                { new: true }
+            );
             res.status(200).json(updatedPost);
         } else {
-            res.status(403).json({ message: "You can only edit your own posts" });
+            res.status(403).json("You can update only your post");
         }
     } catch (err) {
-        console.error("Error updating post:", err);
-        res.status(500).json({ message: "Server error", error: err.message });
+        res.status(500).json(err);
     }
 });
 
 // Delete a post
-router.delete('/:id', async (req, res) => {
+router.delete("/:id", async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
-        if (!post) {
-            return res.status(404).json({ message: "Post not found" });
-        }
         if (post.userId.toString() === req.body.userId) {
-            await post.deleteOne();
+            await Post.findByIdAndDelete(req.params.id);
+            // Decrement the post count for the thread
+            await Thread.findByIdAndUpdate(post.threadId, { $inc: { postCount: -1 } });
+            // Also delete all comments associated with this post
+            await Comment.deleteMany({ postId: req.params.id });
             res.status(200).json({ message: "The post has been deleted" });
         } else {
-            res.status(403).json({ message: "You can only delete your own posts" });
+            res.status(403).json({ message: "You can delete only your post" });
         }
     } catch (err) {
-        console.error("Error deleting post:", err);
-        res.status(500).json({ message: "Server error", error: err.message });
+        res.status(500).json({ message: "Error deleting post", error: err.message });
+    }
+});
+
+// like / dislike a post
+router.put("/:id/like", async (req, res) => {
+    try {
+        const post = await Post.findById(req.params.id);
+        if (!post.likes.includes(req.body.userId)) {
+            await post.updateOne({ $push: { likes: req.body.userId } });
+            res.status(200).json("The post has been liked");
+        } else {
+            await post.updateOne({ $pull: { likes: req.body.userId } });
+            res.status(200).json("The post has been disliked");
+        }
+    } catch (err) {
+        res.status(500).json(err);
+    }
+});
+
+// get a post
+router.get("/:id", async (req, res) => {
+    try {
+        const post = await Post.findById(req.params.id);
+        res.status(200).json(post);
+    } catch (err) {
+        res.status(500).json(err);
+    }
+});
+
+// Get comments for a specific post
+router.get('/:id/comments', async (req, res) => {
+    try {
+        const post = await Post.findById(req.params.id).populate('comments');
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+        res.status(200).json(post.comments);
+    } catch (err) {
+        res.status(500).json({ message: 'Error fetching comments', error: err.message });
     }
 });
 
@@ -71,12 +129,12 @@ router.post('/:id/comments', async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
         if (!post) {
-            return res.status(404).json({ message: "Post not found" });
+            return res.status(404).json({ message: 'Post not found' });
         }
         const newComment = new Comment({
             content: req.body.content,
-            userId: req.body.userId,
             postId: post._id,
+            userId: req.body.userId,
             username: req.body.username
         });
         const savedComment = await newComment.save();
@@ -84,62 +142,48 @@ router.post('/:id/comments', async (req, res) => {
         await post.save();
         res.status(201).json(savedComment);
     } catch (err) {
-        console.error("Error adding comment:", err);
-        res.status(500).json({ message: "Server error", error: err.message });
-    }
-});
-
-// Get all comments for a post
-router.get('/:id/comments', async (req, res) => {
-    try {
-        const comments = await Comment.find({ postId: req.params.id }).sort({ createdAt: 'asc' });
-        res.status(200).json(comments);
-    } catch (err) {
-        console.error("Error fetching comments:", err);
-        res.status(500).json({ message: "Server error", error: err.message });
+        res.status(500).json({ message: 'Error adding comment', error: err.message });
     }
 });
 
 // Update a comment
-router.put('/:id/comments/:commentId', async (req, res) => {
+router.put('/:postId/comments/:commentId', async (req, res) => {
     try {
         const comment = await Comment.findById(req.params.commentId);
-        if (!comment) {
-            return res.status(404).json({ message: "Comment not found" });
-        }
         if (comment.userId.toString() === req.body.userId) {
-            await comment.updateOne({ $set: { content: req.body.content } });
-            const updatedComment = await Comment.findById(req.params.commentId);
+            const updatedComment = await Comment.findByIdAndUpdate(req.params.commentId,
+                { $set: { content: req.body.content } },
+                { new: true }
+            );
             res.status(200).json(updatedComment);
         } else {
-            res.status(403).json({ message: "You can only edit your own comments" });
+            res.status(403).json("You can update only your comment");
         }
     } catch (err) {
-        console.error("Error updating comment:", err);
-        res.status(500).json({ message: "Server error", error: err.message });
+        res.status(500).json({ message: 'Error updating comment', error: err.message });
     }
 });
 
 // Delete a comment
-router.delete('/:id/comments/:commentId', async (req, res) => {
+router.delete('/:postId/comments/:commentId', async (req, res) => {
     try {
         const comment = await Comment.findById(req.params.commentId);
         if (!comment) {
-            return res.status(404).json({ message: "Comment not found" });
+            return res.status(404).json({ message: 'Comment not found' });
         }
         if (comment.userId.toString() === req.body.userId) {
-            await comment.deleteOne();
+            await Comment.findByIdAndDelete(req.params.commentId);
             // Remove the comment reference from the post
-            await Post.findByIdAndUpdate(req.params.id, { $pull: { comments: req.params.commentId } });
+            await Post.findByIdAndUpdate(req.params.postId, {
+                $pull: { comments: req.params.commentId }
+            });
             res.status(200).json({ message: "The comment has been deleted" });
         } else {
-            res.status(403).json({ message: "You can only delete your own comments" });
+            res.status(403).json({ message: "You can delete only your comment" });
         }
     } catch (err) {
-        console.error("Error deleting comment:", err);
-        res.status(500).json({ message: "Server error", error: err.message });
+        res.status(500).json({ message: 'Error deleting comment', error: err.message });
     }
 });
 
 module.exports = router;
-

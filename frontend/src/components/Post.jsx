@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './css/Post.css';
 import { Heart, MessageCircle, Share2, MoreHorizontal, Send, Edit, Trash2 } from 'lucide-react';
 import axios from '../axios';
@@ -32,14 +32,14 @@ export default function Post({ post, onPostUpdate, onPostDelete }) {
         };
     }, [commentOptionsId]);
 
-    const fetchComments = async () => {
+    const fetchComments = useCallback(async () => {
         try {
             const response = await axios.get(`/api/posts/${localPost._id}/comments`);
             setComments(response.data);
         } catch (error) {
             console.error('Error fetching comments:', error);
         }
-    };
+    }, [localPost._id]);
 
     const handleAddComment = async () => {
         if (!newComment.trim()) return;
@@ -49,8 +49,7 @@ export default function Post({ post, onPostUpdate, onPostDelete }) {
             const response = await axios.post(`/api/posts/${localPost._id}/comments`, {
                 content: newComment,
                 userId: user._id,
-                username: user.username,
-                userProfilePicture: user.profilePicture || defaultAvatar
+                username: user.username
             });
             setComments([...comments, response.data]);
             setNewComment('');
@@ -145,6 +144,7 @@ export default function Post({ post, onPostUpdate, onPostDelete }) {
                     <h3>{localPost.user}</h3>
                     <span>{new Date(localPost.createdAt).toLocaleString()}</span>
                 </div>
+                {post.threadTitle && <h4 className="thread-title">{post.threadTitle}</h4>}
                 <div className="post-options">
                     <MoreHorizontal size={20} className="more-options" onClick={() => setShowPostOptions(!showPostOptions)} />
                     {showPostOptions && (
@@ -164,7 +164,10 @@ export default function Post({ post, onPostUpdate, onPostDelete }) {
                             onChange={(e) => setEditedContent(e.target.value)}
                         />
                         <button onClick={handleUpdatePost}>Save</button>
-                        <button onClick={() => setEditingPost(false)}>Cancel</button>
+                        <button onClick={() => {
+                            setEditingPost(false);
+                            setEditedContent('');
+                        }}>Cancel</button>
                     </div>
                 ) : (
                     <p>{localPost.content}</p>
@@ -193,7 +196,10 @@ export default function Post({ post, onPostUpdate, onPostDelete }) {
                                         onChange={(e) => setEditedContent(e.target.value)}
                                     />
                                     <button onClick={() => handleUpdateComment(comment._id)}>Save</button>
-                                    <button onClick={() => setEditingComment(null)}>Cancel</button>
+                                    <button onClick={() => {
+                                        setEditingComment(null);
+                                        setEditedContent('');
+                                    }}>Cancel</button>
                                 </div>
                             ) : (
                                 <p>{comment.content}</p>
@@ -217,6 +223,12 @@ export default function Post({ post, onPostUpdate, onPostDelete }) {
                     placeholder="Write a comment..."
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
+                    onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddComment();
+                        }
+                    }}
                 />
                 <button onClick={handleAddComment}><Send size={20} /></button>
             </div>
