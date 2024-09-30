@@ -4,6 +4,8 @@ import { Heart, MessageCircle, Share2, MoreHorizontal, Send, Edit, Trash2 } from
 import axios from '../axios';
 
 export default function Post({ post, onPostUpdate, onPostDelete }) {
+    console.log('Post props:', { post, onPostUpdate, onPostDelete }); // Add this line for debugging
+
     const [localPost, setLocalPost] = useState(post);
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState('');
@@ -51,7 +53,8 @@ export default function Post({ post, onPostUpdate, onPostDelete }) {
                 userId: user._id,
                 username: user.username
             });
-            setComments([...comments, response.data]);
+            const updatedComments = await axios.get(`/api/posts/${localPost._id}/comments`);
+            setComments(updatedComments.data);
             setNewComment('');
         } catch (error) {
             console.error('Error adding comment:', error);
@@ -65,20 +68,26 @@ export default function Post({ post, onPostUpdate, onPostDelete }) {
     };
 
     const handleUpdatePost = async () => {
+        console.log('Attempting to update post:', localPost._id); // Add this line
         try {
             const response = await axios.put(`/api/posts/${localPost._id}`, {
                 content: editedContent,
-                userId: localPost.userId // Ensure this is the correct user ID
+                userId: localPost.userId
             });
             setLocalPost(response.data);
             setEditingPost(false);
-            onPostUpdate(response.data);
+            console.log('Post updated successfully:', response.data); // Add this line
+            if (typeof onPostUpdate === 'function') {
+                onPostUpdate(response.data);
+            } else {
+                console.warn('onPostUpdate is not a function:', onPostUpdate);
+            }
         } catch (error) {
             console.error('Error updating post:', error);
             if (error.response && error.response.status === 403) {
                 alert('You do not have permission to edit this post.');
             } else {
-                alert('An error occurred while updating the post. Please try again.');
+                console.error('An error occurred while updating the post:', error);
             }
         }
     };

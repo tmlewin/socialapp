@@ -21,8 +21,12 @@ export default function Feed() {
         setError(null);
         try {
             const response = await axios.get('/api/posts');
-            setPosts(response.data);
-            setFilteredPosts(response.data);
+            const updatedPosts = response.data.map(post => ({
+                ...post,
+                userProfilePicture: post.userProfilePicture || post.userId.profilePicture
+            }));
+            setPosts(updatedPosts);
+            setFilteredPosts(updatedPosts);
         } catch (error) {
             console.error("Error fetching posts:", error);
             setError("Failed to fetch posts. Please try again later.");
@@ -43,14 +47,15 @@ export default function Feed() {
         }
     }, [posts]);
 
-    const handlePostUpdate = (updatedPost) => {
+    const handlePostUpdate = useCallback((updatedPost) => {
+        console.log('handlePostUpdate called with:', updatedPost); // Add this line
         setPosts(prevPosts => {
             const updatedPosts = prevPosts.map(post => 
                 post._id === updatedPost._id ? updatedPost : post
             );
             return updatedPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         });
-    };
+    }, []);
 
     const handlePostDelete = (deletedPostId) => {
         setPosts(prevPosts => prevPosts.filter(post => post._id !== deletedPostId));

@@ -19,6 +19,10 @@ const CommentSchema = new mongoose.Schema(
         username: {
             type: String,
             required: true
+        },
+        userProfilePicture: {
+            type: String,
+            default: "https://via.placeholder.com/40"
         }
     },
     { timestamps: true }

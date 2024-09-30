@@ -9,8 +9,14 @@ const auth = require('../middleware/auth');
 // Get all posts
 router.get('/', async (req, res) => {
     try {
-        const posts = await Post.find().sort({ createdAt: -1 });
-        res.status(200).json(posts);
+        const posts = await Post.find()
+            .sort({ createdAt: -1 })
+            .populate('userId', 'username profilePicture');
+        const updatedPosts = posts.map(post => ({
+            ...post._doc,
+            userProfilePicture: post.userId.profilePicture
+        }));
+        res.status(200).json(updatedPosts);
     } catch (err) {
         res.status(500).json(err);
     }
@@ -38,31 +44,18 @@ router.get('/search', async (req, res) => {
 
 // Create a new post
 router.post('/', auth, async (req, res) => {
-    const { title, content, threadId } = req.body;
-    const userId = req.user.id;
-
     try {
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
+        const user = await User.findById(req.user.id);
         const newPost = new Post({
-            title,
-            content,
-            threadId,
-            userId,
+            ...req.body,
+            userId: req.user.id,
             user: user.username,
+            userProfilePicture: user.profilePicture
         });
-
         const savedPost = await newPost.save();
-        
-        // Increment the post count for the thread
-        await Thread.findByIdAndUpdate(threadId, { $inc: { postCount: 1 } });
-
-        res.status(201).json(savedPost);
+        res.status(200).json(savedPost);
     } catch (err) {
-        res.status(500).json({ message: 'Error creating post', error: err.message });
+        res.status(500).json(err);
     }
 });
 
@@ -136,28 +129,33 @@ router.get("/:id", async (req, res) => {
 // Get comments for a specific post
 router.get('/:id/comments', async (req, res) => {
     try {
-        const post = await Post.findById(req.params.id).populate('comments');
-        if (!post) {
-            return res.status(404).json({ message: 'Post not found' });
-        }
-        res.status(200).json(post.comments);
+        const comments = await Comment.find({ postId: req.params.id })
+            .populate('userId', 'username profilePicture')
+            .sort({ createdAt: 1 });
+        const updatedComments = comments.map(comment => ({
+            ...comment._doc,
+            userProfilePicture: comment.userId.profilePicture
+        }));
+        res.status(200).json(updatedComments);
     } catch (err) {
-        res.status(500).json({ message: 'Error fetching comments', error: err.message });
+        res.status(500).json(err);
     }
 });
 
 // Add a comment to a post
-router.post('/:id/comments', async (req, res) => {
+router.post('/:id/comments', auth, async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
         if (!post) {
             return res.status(404).json({ message: 'Post not found' });
         }
+        const user = await User.findById(req.user.id);
         const newComment = new Comment({
             content: req.body.content,
             postId: post._id,
-            userId: req.body.userId,
-            username: req.body.username
+            userId: req.user.id,
+            username: user.username,
+            userProfilePicture: user.profilePicture
         });
         const savedComment = await newComment.save();
         post.comments.push(savedComment._id);

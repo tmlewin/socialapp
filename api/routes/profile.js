@@ -3,6 +3,9 @@ const router = express.Router()
 const User = require('../models/User')
 const bcrypt = require('bcrypt')
 const auth = require('../middleware/auth')
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' }); // Adjust the destination as needed
+const fs = require('fs');
 
 // Get user profile
 router.get('/profile', auth, async (req, res) => {
@@ -19,36 +22,36 @@ router.get('/profile', auth, async (req, res) => {
 })
 
 // Update user profile
-router.put('/profile', auth, async (req, res) => {
-    const {
-        displayName,
-        fullName,
-        dateOfBirth,
-        location,
-        bio,
-        website
-    } = req.body
-
+router.put('/profile', auth, upload.single('profilePicture'), async (req, res) => {
     try {
-        let user = await User.findById(req.user.id)
-
+        const user = await User.findById(req.user.id);
         if (!user) {
-            return res.status(404).json({ message: 'User not found' })
+            return res.status(404).json({ message: 'User not found' });
         }
 
-        user.displayName = displayName || user.displayName
-        user.fullName = fullName || user.fullName
-        user.dateOfBirth = dateOfBirth || user.dateOfBirth
-        user.location = location || user.location
-        user.bio = bio || user.bio
-        user.website = website || user.website
+        if (req.file) {
+            const fileName = req.file.filename;
+            const filePath = `uploads/${fileName}`;
+            user.profilePicture = `${req.protocol}://${req.get('host')}/${filePath}`;
+            // Move the uploaded file to the correct location
+            fs.renameSync(req.file.path, filePath);
+        }
 
-        await user.save()
+        // Update other fields
+        const { displayName, fullName, dateOfBirth, location, bio, website } = req.body;
+        user.displayName = displayName || user.displayName;
+        user.fullName = fullName || user.fullName;
+        user.dateOfBirth = dateOfBirth || user.dateOfBirth;
+        user.location = location || user.location;
+        user.bio = bio || user.bio;
+        user.website = website || user.website;
 
-        res.json(user)
+        await user.save();
+
+        res.json(user);
     } catch (err) {
-        console.error(err.message)
-        res.status(500).send('Server Error')
+        console.error(err.message);
+        res.status(500).send('Server Error');
     }
 })
 

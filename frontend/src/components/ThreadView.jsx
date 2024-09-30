@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from '../axios';
 import Post from './Post';
@@ -36,6 +36,18 @@ const ThreadView = () => {
         setPosts(prevPosts => [newPost, ...prevPosts]);
     };
 
+    const handlePostUpdate = useCallback((updatedPost) => {
+        console.log('ThreadView handlePostUpdate called with:', updatedPost);
+        setPosts(prevPosts => prevPosts.map(post => 
+            post._id === updatedPost._id ? updatedPost : post
+        ));
+    }, []);
+
+    const handlePostDelete = useCallback((deletedPostId) => {
+        console.log('ThreadView handlePostDelete called with:', deletedPostId);
+        setPosts(prevPosts => prevPosts.filter(post => post._id !== deletedPostId));
+    }, []);
+
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
     if (!thread) return <div>Thread not found</div>;
@@ -49,7 +61,12 @@ const ThreadView = () => {
                 <p>No posts in this thread yet. Be the first to post!</p>
             ) : (
                 posts.map(post => (
-                    <Post key={post._id} post={post} />
+                    <Post 
+                        key={post._id} 
+                        post={post} 
+                        onPostUpdate={handlePostUpdate}
+                        onPostDelete={handlePostDelete}
+                    />
                 ))
             )}
         </div>
