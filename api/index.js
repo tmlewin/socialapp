@@ -1,13 +1,12 @@
 require('dotenv').config({ path: '.env' });
-const mongoose = require('mongoose');
 const express = require('express');
 const cors = require('cors');
-const bp = require('body-parser');
+const connectDB = require('./config/db');
 const authRoutes = require('./routes/auth');
 const postRoutes = require('./routes/posts');
 const threadRoutes = require('./routes/threads');
 const profileRoutes = require('./routes/profile');
-const connectDB = require('./config/db');
+const usersRoutes = require('./routes/users');
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -26,6 +25,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/threads', threadRoutes);
 app.use('/api/users', profileRoutes);
+app.use('/api/users', usersRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

@@ -7,3 +7,15 @@
 .feed .search-bar {
     margin-bottom: 30px;
 }
+
+.loading-spinner {
+    text-align: center;
+    padding: 20px;
+    font-weight: bold;
+}
+
+.error-message {
+    color: red;
+    text-align: center;
+    padding: 20px;
+}

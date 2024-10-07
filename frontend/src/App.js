@@ -51,7 +51,7 @@ function App() {
                                 <Route path="/" element={<Feed />} />
                                 <Route path="/profile" element={<Profile />} />
                                 <Route path="/threads" element={<ThreadsPage />} />
-                                <Route path="/forum" element={<ForumPage />} />
+                                {<Route path="/forum" element={<ForumPage />} />}
                                 <Route path="/thread/:threadId" element={<ThreadView />} />
                                 <Route path="*" element={<Navigate to="/" replace />} />
                             </Routes>

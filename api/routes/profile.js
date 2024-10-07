@@ -6,6 +6,7 @@ const auth = require('../middleware/auth')
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' }); // Adjust the destination as needed
 const fs = require('fs');
+const Post = require('../models/Post'); // Assuming Post model is defined elsewhere
 
 // Get user profile
 router.get('/profile', auth, async (req, res) => {
@@ -47,6 +48,9 @@ router.put('/profile', auth, upload.single('profilePicture'), async (req, res) =
         user.website = website || user.website;
 
         await user.save();
+
+        // Update all posts with the new profile picture
+        await Post.updateMany({ userId: user._id }, { userProfilePicture: user.profilePicture });
 
         res.json(user);
     } catch (err) {

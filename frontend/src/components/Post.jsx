@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import './css/Post.css';
 import { Heart, MessageCircle, Share2, MoreHorizontal, Send, Edit, Trash2 } from 'lucide-react';
 import axios from '../axios';
 
 export default function Post({ post, onPostUpdate, onPostDelete }) {
-    console.log('Post props:', { post, onPostUpdate, onPostDelete }); // Add this line for debugging
+    console.log('Post object:', post); // Add this line for debugging
+    console.log('UserId:', post.userId); // Add this line for debugging
 
     const [localPost, setLocalPost] = useState(post);
     const [comments, setComments] = useState([]);
@@ -16,23 +17,39 @@ export default function Post({ post, onPostUpdate, onPostDelete }) {
     const [commentOptionsId, setCommentOptionsId] = useState(null);
     const defaultAvatar = "https://via.placeholder.com/40";
 
+    const [userProfilePicture, setUserProfilePicture] = useState(post.userProfilePicture || defaultAvatar);
+    const [isLiked, setIsLiked] = useState(false);
+
+    // Add these new refs
+    const postOptionsRef = useRef(null);
+    const commentOptionsRef = useRef(null);
+
     useEffect(() => {
         setLocalPost(post);
         fetchComments();
+        // Check if the current user has liked the post
+        const currentUser = JSON.parse(localStorage.getItem('user'));
+        setIsLiked(post.likes.includes(currentUser._id));
     }, [post]);
 
     useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (commentOptionsId && !event.target.closest('.comment-options')) {
-                setCommentOptionsId(null);
+        const fetchLatestProfilePicture = async () => {
+            if (!post.userId) {
+                console.error('No userId provided for post:', post);
+                return;
+            }
+            try {
+                const response = await axios.get(`/api/users/${post.userId}`);
+                if (response.data && response.data.profilePicture) {
+                    setUserProfilePicture(response.data.profilePicture);
+                }
+            } catch (error) {
+                console.error('Error fetching latest profile picture:', error.response || error);
             }
         };
 
-        document.addEventListener('click', handleClickOutside);
-        return () => {
-            document.removeEventListener('click', handleClickOutside);
-        };
-    }, [commentOptionsId]);
+        fetchLatestProfilePicture();
+    }, [post.userId]);
 
     const fetchComments = useCallback(async () => {
         try {
@@ -119,9 +136,16 @@ export default function Post({ post, onPostUpdate, onPostDelete }) {
                 content: editedContent,
                 userId: user._id
             });
-            setComments(comments.map(c => c._id === commentId ? response.data : c));
-            setEditingComment(null);
-            setEditedContent('');
+            
+            // Check if the response contains the updated comment data
+            if (response.data && response.data._id) {
+                const updatedComment = response.data;
+                setComments(comments.map(c => c._id === commentId ? updatedComment : c));
+                setEditingComment(null);
+                setEditedContent('');
+            } else {
+                console.error('Unexpected response format:', response.data);
+            }
         } catch (error) {
             console.error('Error updating comment:', error);
         }
@@ -140,11 +164,59 @@ export default function Post({ post, onPostUpdate, onPostDelete }) {
         }
     };
 
+    const handleLike = async () => {
+        try {
+            const currentUser = JSON.parse(localStorage.getItem('user'));
+            const response = await axios.put(`/api/posts/${localPost._id}/like`, {
+                userId: currentUser._id
+            });
+
+            // Update local state
+            const updatedLikes = isLiked
+                ? localPost.likes.filter(id => id !== currentUser._id)
+                : [...localPost.likes, currentUser._id];
+
+            setLocalPost(prev => ({
+                ...prev,
+                likes: updatedLikes
+            }));
+            setIsLiked(!isLiked);
+
+            // Call onPostUpdate if it exists
+            if (typeof onPostUpdate === 'function') {
+                onPostUpdate({
+                    ...localPost,
+                    likes: updatedLikes
+                });
+            }
+        } catch (error) {
+            console.error('Error liking/unliking post:', error);
+        }
+    };
+
+    // Add this new useEffect hook
+    useEffect(() => {
+        const handleOutsideClick = (event) => {
+            if (postOptionsRef.current && !postOptionsRef.current.contains(event.target)) {
+                setShowPostOptions(false);
+            }
+            if (commentOptionsRef.current && !commentOptionsRef.current.contains(event.target)) {
+                setCommentOptionsId(null);
+            }
+        };
+
+        document.addEventListener('mousedown', handleOutsideClick);
+
+        return () => {
+            document.removeEventListener('mousedown', handleOutsideClick);
+        };
+    }, []);
+
     return (
         <div className="post">
             <div className="post-header">
                 <img 
-                    src={localPost.userProfilePicture || defaultAvatar} 
+                    src={userProfilePicture || defaultAvatar} 
                     alt={localPost.user} 
                     className="avatar" 
                     onError={(e) => { e.target.onerror = null; e.target.src = defaultAvatar; }}
@@ -157,7 +229,7 @@ export default function Post({ post, onPostUpdate, onPostDelete }) {
                 <div className="post-options">
                     <MoreHorizontal size={20} className="more-options" onClick={() => setShowPostOptions(!showPostOptions)} />
                     {showPostOptions && (
-                        <div className="options-dropdown">
+                        <div className="options-dropdown" ref={postOptionsRef}>
                             <button onClick={handleEditPost}><Edit size={16} /> Edit</button>
                             <button onClick={handleDeletePost}><Trash2 size={16} /> Delete</button>
                         </div>
@@ -167,23 +239,29 @@ export default function Post({ post, onPostUpdate, onPostDelete }) {
             <div className="post-content">
                 {localPost.title && <h4>{localPost.title}</h4>}
                 {editingPost ? (
-                    <div>
+                    <div className="edit-post-container">
                         <textarea
                             value={editedContent}
                             onChange={(e) => setEditedContent(e.target.value)}
+                            className="edit-textarea"
                         />
-                        <button onClick={handleUpdatePost}>Save</button>
-                        <button onClick={() => {
-                            setEditingPost(false);
-                            setEditedContent('');
-                        }}>Cancel</button>
+                        <div className="edit-buttons">
+                            <button onClick={handleUpdatePost} className="btn btn-save">Save</button>
+                            <button onClick={() => {
+                                setEditingPost(false);
+                                setEditedContent('');
+                            }} className="btn btn-cancel">Cancel</button>
+                        </div>
                     </div>
                 ) : (
                     <p>{localPost.content}</p>
                 )}
             </div>
             <div className="post-actions">
-                <button><Heart size={20} /> {localPost.likes.length}</button>
+                <button onClick={handleLike} className={`like-button ${isLiked ? 'liked' : ''}`}>
+                    <Heart size={20} fill={isLiked ? "#ff0000" : "none"} stroke={isLiked ? "#ff0000" : "currentColor"} />
+                    {localPost.likes.length}
+                </button>
                 <button><MessageCircle size={20} /> {comments.length}</button>
                 <button><Share2 size={20} /></button>
             </div>
@@ -199,16 +277,19 @@ export default function Post({ post, onPostUpdate, onPostDelete }) {
                         <div className="comment-content">
                             <strong>{comment.username}</strong>
                             {editingComment === comment._id ? (
-                                <div>
+                                <div className="edit-comment-container">
                                     <textarea
                                         value={editedContent}
                                         onChange={(e) => setEditedContent(e.target.value)}
+                                        className="edit-textarea"
                                     />
-                                    <button onClick={() => handleUpdateComment(comment._id)}>Save</button>
-                                    <button onClick={() => {
-                                        setEditingComment(null);
-                                        setEditedContent('');
-                                    }}>Cancel</button>
+                                    <div className="edit-buttons">
+                                        <button onClick={() => handleUpdateComment(comment._id)} className="btn btn-save">Save</button>
+                                        <button onClick={() => {
+                                            setEditingComment(null);
+                                            setEditedContent('');
+                                        }} className="btn btn-cancel">Cancel</button>
+                                    </div>
                                 </div>
                             ) : (
                                 <p>{comment.content}</p>
@@ -217,7 +298,7 @@ export default function Post({ post, onPostUpdate, onPostDelete }) {
                         <div className="comment-options">
                             <MoreHorizontal size={16} onClick={() => setCommentOptionsId(comment._id)} />
                             {commentOptionsId === comment._id && (
-                                <div className="options-dropdown">
+                                <div className="options-dropdown" ref={commentOptionsRef}>
                                     <button onClick={() => handleEditComment(comment)}><Edit size={14} /> Edit</button>
                                     <button onClick={() => handleDeleteComment(comment._id)}><Trash2 size={14} /> Delete</button>
                                 </div>
