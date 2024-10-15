@@ -1,10 +1,43 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const Post = require('../models/Post');
 const User = require('../models/User');
 const Comment = require('../models/Comment');
 const Thread = require('../models/Thread');
 const auth = require('../middleware/auth');
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const uploadDir = 'uploads/';
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 4 * 1024 * 1024 }, // 4MB limit
+    fileFilter: (req, file, cb) => {
+        const filetypes = /jpeg|jpg|png|gif/;
+        const mimetype = filetypes.test(file.mimetype);
+        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+       
+        if (mimetype && extname) {
+            return cb(null, true);
+        }
+        cb(new Error("Error: File upload only supports images"));
+    }
+}).array('images', 5); // Change this line to use 'images' and allow up to 5 images
 
 // Get all posts (with pagination)
 router.get('/', async (req, res) => {
@@ -59,25 +92,36 @@ router.get('/search', async (req, res) => {
 });
 
 // Create a new post
-router.post('/', auth, async (req, res) => {
-    try {
-        const user = await User.findById(req.user.id);
-        const newPost = new Post({
-            ...req.body,
-            userId: user._id,
-            user: user.username,
-            userProfilePicture: user.profilePicture
-        });
-        const savedPost = await newPost.save();
+router.post('/', auth, (req, res) => {
+    upload(req, res, async (err) => {
+        if (err) {
+            return res.status(400).json({ message: err.message });
+        }
 
-        // Increment the post count for the thread
-        await Thread.findByIdAndUpdate(req.body.threadId, { $inc: { postCount: 1 } });
+        try {
+            const user = await User.findById(req.user.id);
+            const newPost = new Post({
+                threadId: req.body.threadId,
+                title: req.body.title,
+                content: req.body.content,
+                userId: user._id,
+                user: user.username,
+                userProfilePicture: user.profilePicture,
+                images: req.files ? req.files.map(file => file.path.replace(/\\/g, '/')) : [] // Replace backslashes with forward slashes
+            });
 
-        res.status(200).json(savedPost);
-    } catch (err) {
-        console.error('Error creating post:', err);
-        res.status(500).json({ message: 'Error creating post', error: err.message });
-    }
+            const savedPost = await newPost.save();
+
+            // Increment the post count for the thread
+            await Thread.findByIdAndUpdate(req.body.threadId, { $inc: { postCount: 1 } });
+
+            // Send the full post data including images
+            res.status(200).json(savedPost);
+        } catch (err) {
+            console.error('Error creating post:', err);
+            res.status(500).json({ message: 'Error creating post', error: err.message });
+        }
+    });
 });
 
 // Update a post

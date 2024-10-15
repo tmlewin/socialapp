@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import DOMPurify from 'dompurify';
 import './css/Post.css';
-import { Heart, MessageCircle, Share2, MoreHorizontal, Send, Edit, Trash2 } from 'lucide-react';
+import { Heart, MessageCircle, Share2, MoreHorizontal, Send, Edit, Trash2, Copy } from 'lucide-react';
 import axios from '../axios';
+import { Link } from 'react-router-dom';
+import config from '../config'; // We'll create this file
 
 export default function Post({ post, onPostUpdate, onPostDelete }) {
     console.log('Post object:', post); // Add this line for debugging
@@ -19,6 +22,8 @@ export default function Post({ post, onPostUpdate, onPostDelete }) {
 
     const [userProfilePicture, setUserProfilePicture] = useState(post.userProfilePicture || defaultAvatar);
     const [isLiked, setIsLiked] = useState(false);
+    const [showSharePopup, setShowSharePopup] = useState(false);
+    const [copySuccess, setCopySuccess] = useState('');
 
     // Add these new refs
     const postOptionsRef = useRef(null);
@@ -194,6 +199,22 @@ export default function Post({ post, onPostUpdate, onPostDelete }) {
         }
     };
 
+    const handleShareClick = () => {
+        setShowSharePopup(true);
+    };
+
+    const copyToClipboard = () => {
+        const postLink = `${window.location.origin}/thread/${localPost.threadId}`;
+        navigator.clipboard.writeText(postLink)
+            .then(() => {
+                setCopySuccess('Link copied!');
+                setTimeout(() => setCopySuccess(''), 2000);
+            })
+            .catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+    };
+
     // Add this new useEffect hook
     useEffect(() => {
         const handleOutsideClick = (event) => {
@@ -212,6 +233,23 @@ export default function Post({ post, onPostUpdate, onPostDelete }) {
         };
     }, []);
 
+    const renderContent = () => {
+        const sanitizedContent = DOMPurify.sanitize(localPost.content);
+        return { __html: sanitizedContent };
+    };
+
+    const ContentRenderer = ({ content }) => {
+        const containerRef = useRef(null);
+
+        useEffect(() => {
+            if (containerRef.current) {
+                containerRef.current.innerHTML = content.__html;
+            }
+        }, [content]);
+
+        return <div ref={containerRef} />;
+    };
+
     return (
         <div className="post">
             <div className="post-header">
@@ -225,8 +263,7 @@ export default function Post({ post, onPostUpdate, onPostDelete }) {
                     <h3>{localPost.user}</h3>
                     <span>{new Date(localPost.createdAt).toLocaleString()}</span>
                 </div>
-                {post.threadTitle && <h4 className="thread-title">{post.threadTitle}</h4>}
-                <div className="post-options">
+            <div className="post-options">
                     <MoreHorizontal size={20} className="more-options" onClick={() => setShowPostOptions(!showPostOptions)} />
                     {showPostOptions && (
                         <div className="options-dropdown" ref={postOptionsRef}>
@@ -237,7 +274,11 @@ export default function Post({ post, onPostUpdate, onPostDelete }) {
                 </div>
             </div>
             <div className="post-content">
-                {localPost.title && <h4>{localPost.title}</h4>}
+                {localPost.title && (
+                    <Link to={`/thread/${localPost.threadId}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                        <h4 className="thread-title">{localPost.title}</h4>
+                    </Link>
+                )}
                 {editingPost ? (
                     <div className="edit-post-container">
                         <textarea
@@ -254,7 +295,21 @@ export default function Post({ post, onPostUpdate, onPostDelete }) {
                         </div>
                     </div>
                 ) : (
-                    <p>{localPost.content}</p>
+                    <>
+                        <ContentRenderer content={renderContent()} />
+                        {localPost.images && localPost.images.length > 0 && (
+                            <div className="post-images">
+                                {localPost.images.map((image, index) => (
+                                    <img 
+                                        key={index} 
+                                        src={`${config.apiUrl}/${image}`} 
+                                        alt={`Post image ${index + 1}`} 
+                                        className="post-image"
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
             <div className="post-actions">
@@ -263,8 +318,27 @@ export default function Post({ post, onPostUpdate, onPostDelete }) {
                     {localPost.likes.length}
                 </button>
                 <button><MessageCircle size={20} /> {comments.length}</button>
-                <button><Share2 size={20} /></button>
+                <button onClick={handleShareClick}><Share2 size={20} /></button>
             </div>
+            {showSharePopup && (
+                <div className="share-popup">
+                    <div className="share-popup-content">
+                        <h4>Share this post</h4>
+                        <div className="share-link">
+                            <input 
+                                type="text" 
+                                value={`${window.location.origin}/thread/${localPost.threadId}`} 
+                                readOnly 
+                            />
+                            <button onClick={copyToClipboard}>
+                                <Copy size={20} />
+                            </button>
+                        </div>
+                        {copySuccess && <p className="copy-success">{copySuccess}</p>}
+                        <button onClick={() => setShowSharePopup(false)} className="close-popup">Close</button>
+                    </div>
+                </div>
+            )}
             <div className="post-comments">
                 {comments.map((comment) => (
                     <div key={comment._id} className="comment">

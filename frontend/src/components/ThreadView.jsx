@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from '../axios';
 import Post from './Post';
 import CreatePost from './CreatePost';
+import LoadingSpinner from './LoadingSpinner';
 import './css/ThreadView.css';
 
 const ThreadView = () => {
@@ -48,7 +49,7 @@ const ThreadView = () => {
         setPosts(prevPosts => prevPosts.filter(post => post._id !== deletedPostId));
     }, []);
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) return <LoadingSpinner />;
     if (error) return <div>Error: {error}</div>;
     if (!thread) return <div>Thread not found</div>;
 
