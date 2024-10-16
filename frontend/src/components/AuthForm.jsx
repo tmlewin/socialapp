@@ -61,7 +61,7 @@ const AuthForm = ({ onAuthSuccess }) => {
         <div className="auth-form-container">
             <div className="auth-form">
                 <h1>Welcome back</h1>
-                <p>Enter your credentials to access your account</p>
+                <p>{isLogin ? 'Enter your credentials to access your account' : 'Create an account to start using threads'}</p>
                 <div className="auth-toggle">
                     <button 
                         className={isLogin ? 'active' : ''} 

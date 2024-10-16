@@ -1,15 +1,43 @@
 .header {
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    width: 100%;
+    z-index: 1000;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.header.sticky {
+    position: fixed;
+    top: 0;
+    left: 0;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+.header-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 10px 20px;
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .header h1 {
     font-size: 24px;
     color: #333;
+    margin: 0;
 }
 
 .header nav {
@@ -22,16 +50,28 @@
     color: #333;
     font-weight: 500;
     transition: color 0.3s ease;
+    padding: 5px 10px;
+    border-radius: 5px;
 }
 
 .header nav a:hover {
     color: #007bff;
+    background-color: rgba(0, 123, 255, 0.1);
 }
 
 .header-actions {
     display: flex;
     align-items: center;
     gap: 20px;
+}
+
+.header-actions > * {
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.header-actions > *:hover {
+    color: #007bff;
 }
 
 .logout-btn {
@@ -42,4 +82,28 @@
     border: none;
     cursor: pointer;
     color: #333;
+    transition: all 0.3s ease;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+.logout-btn:hover {
+    background-color: rgba(255, 0, 0, 0.1);
+    color: #ff0000;
+}
+
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .header nav {
+        margin: 10px 0;
+    }
+
+    .header-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
 }
