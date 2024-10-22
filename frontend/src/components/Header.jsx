@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './css/Header.css'
-import { Bell, User, LogOut } from 'lucide-react';
+import { Bell, User, LogOut, BarChart2, PieChart } from 'lucide-react';
+import { useNotification } from '../context/NotificationContext';
 
 export default function Header({ onLogout }) {
     const [isSticky, setIsSticky] = useState(false);
+    const { unreadCount, updateUnreadCount } = useNotification();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -17,10 +20,21 @@ export default function Header({ onLogout }) {
 
         window.addEventListener('scroll', handleScroll);
 
+        // Update unread count when component mounts
+        updateUnreadCount();
+
+        // Set up polling for real-time updates
+        const intervalId = setInterval(updateUnreadCount, 30000); // Poll every 30 seconds
+
         return () => {
             window.removeEventListener('scroll', handleScroll);
+            clearInterval(intervalId);
         };
-    }, []);
+    }, [updateUnreadCount]);
+
+    const handleNotificationClick = () => {
+        navigate('/profile', { state: { activeTab: 'messaging' } });
+    };
 
     return (
         <header className={`header ${isSticky ? 'sticky' : ''}`}>
@@ -31,9 +45,16 @@ export default function Header({ onLogout }) {
                     <Link to="/forum">Forum</Link>
                     <Link to="/threads">Threads</Link>
                     <Link to="/profile">Profile</Link>
+                    <Link to="/dashboard">Dashboard</Link>
+                    <Link to="/polls">Polls</Link>
                 </nav>
                 <div className="header-actions">
-                    <Bell size={24} />
+                    <div className="notification-icon" onClick={handleNotificationClick}>
+                        <Bell size={24} />
+                        {unreadCount > 0 && (
+                            <span className="notification-count">{unreadCount}</span>
+                        )}
+                    </div>
                     <User size={24} />
                     <button onClick={onLogout} className="logout-btn">
                         <LogOut size={24} />

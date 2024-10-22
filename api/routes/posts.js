@@ -8,6 +8,7 @@ const User = require('../models/User');
 const Comment = require('../models/Comment');
 const Thread = require('../models/Thread');
 const auth = require('../middleware/auth');
+const { checkAndAwardAchievements } = require('./achievements');
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -107,7 +108,7 @@ router.post('/', auth, (req, res) => {
                 userId: user._id,
                 user: user.username,
                 userProfilePicture: user.profilePicture,
-                images: req.files ? req.files.map(file => file.path.replace(/\\/g, '/')) : [] // Replace backslashes with forward slashes
+                images: req.files ? req.files.map(file => file.path.replace(/\\/g, '/')) : []
             });
 
             const savedPost = await newPost.save();
@@ -115,8 +116,10 @@ router.post('/', auth, (req, res) => {
             // Increment the post count for the thread
             await Thread.findByIdAndUpdate(req.body.threadId, { $inc: { postCount: 1 } });
 
-            // Send the full post data including images
-            res.status(200).json(savedPost);
+            // Check and award achievements
+            const updatedAchievements = await checkAndAwardAchievements(user._id);
+
+            res.status(200).json({ post: savedPost, achievements: updatedAchievements });
         } catch (err) {
             console.error('Error creating post:', err);
             res.status(500).json({ message: 'Error creating post', error: err.message });
@@ -225,7 +228,11 @@ router.post('/:id/comments', auth, async (req, res) => {
         const savedComment = await newComment.save();
         post.comments.push(savedComment._id);
         await post.save();
-        res.status(201).json(savedComment);
+
+        // Check and award achievements
+        const updatedAchievements = await checkAndAwardAchievements(req.user.id);
+
+        res.status(201).json({ comment: savedComment, achievements: updatedAchievements });
     } catch (err) {
         res.status(500).json({ message: 'Error adding comment', error: err.message });
     }

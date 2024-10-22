@@ -40,7 +40,11 @@ const UserSchema = new mongoose.Schema(
             facebook:String,
             instagram:String,
             linkedin:String
-        }
+        },
+        achievements: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Achievement'
+        }]
     },
     {timestamps: true}
 

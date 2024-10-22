@@ -315,9 +315,9 @@ export default function Post({ post, onPostUpdate, onPostDelete }) {
             <div className="post-actions">
                 <button onClick={handleLike} className={`like-button ${isLiked ? 'liked' : ''}`}>
                     <Heart size={20} fill={isLiked ? "#ff0000" : "none"} stroke={isLiked ? "#ff0000" : "currentColor"} />
-                    {localPost.likes.length}
+                    {localPost && localPost.likes ? localPost.likes.length : 0}
                 </button>
-                <button><MessageCircle size={20} /> {comments.length}</button>
+                <button><MessageCircle size={20} /> {comments ? comments.length : 0}</button>
                 <button onClick={handleShareClick}><Share2 size={20} /></button>
             </div>
             {showSharePopup && (
