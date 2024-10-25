@@ -50,24 +50,33 @@ const CreatePost = ({ threadId, onPostCreated }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const formData = new FormData();
-        formData.append('threadId', threadId);
-        formData.append('title', title);
-        formData.append('content', content);
-        images.forEach((image) => {
-            formData.append('images', image);
-        });
-
         try {
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('content', content);
+            formData.append('threadId', threadId);
+            images.forEach((image) => {
+                formData.append('images', image); // Change this line
+            });
+
             const response = await axios.post('/api/posts', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
-            onPostCreated(response.data);
+
+            // Make sure the response.data has the correct structure
+            const newPost = {
+                ...response.data.post, // Change this line
+                likes: [], // Initialize likes as an empty array if not provided by the server
+                comments: [] // Initialize comments as an empty array if not provided by the server
+            };
+
+            onPostCreated(newPost);
             setTitle('');
             setContent('');
-            setImages([]); // Clear the images array
+            setImages([]);
         } catch (error) {
-            console.error('Error creating post:', error.response?.data || error.message);
+            console.error('Error creating post:', error);
+            alert('Failed to create post. Please try again.'); // Add this line to show an error message
         }
     };
 

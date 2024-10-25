@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from '../axios';
 import './css/Profile.css';
+import { MessageSquare, PenTool, Vote, Award } from 'lucide-react';
+import Messaging from './Messaging';
 
 const Profile = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [user, setUser] = useState(null);
     const [formData, setFormData] = useState({});
     const [error, setError] = useState('');
@@ -12,6 +15,9 @@ const Profile = () => {
     const [activeTab, setActiveTab] = useState('profile');
     const [newProfilePicture, setNewProfilePicture] = useState(null);
     const [preview, setPreview] = useState('');
+    const [activityFeed, setActivityFeed] = useState([]);
+    const [achievements, setAchievements] = useState([]);
+    const [updateNotificationCount, setUpdateNotificationCount] = useState(() => () => {});
 
     const formatDate = (dateString) => {
         if (!dateString) return '';
@@ -32,6 +38,13 @@ const Profile = () => {
                 });
                 // Set the preview to the user's profile picture
                 setPreview(response.data.profilePicture);
+
+                // Trigger achievement check
+                await axios.post('/api/achievements/check');
+                
+                // Fetch updated achievements
+                const achievementsResponse = await axios.get('/api/achievements');
+                setAchievements(achievementsResponse.data);
             } catch (error) {
                 console.error('Error fetching user profile:', error);
                 if (error.response && error.response.status === 401) {
@@ -46,6 +59,67 @@ const Profile = () => {
 
         fetchUserProfile();
     }, [navigate]);
+
+    useEffect(() => {
+        const fetchUserActivity = async () => {
+            try {
+                const response = await axios.get('/api/users/activity');
+                setActivityFeed(response.data);
+            } catch (error) {
+                console.error('Error fetching user activity:', error);
+                setError('Failed to load user activity. Please try again.');
+            }
+        };
+
+        if (user) {
+            fetchUserActivity();
+        }
+    }, [user]);
+
+    useEffect(() => {
+        const fetchAchievements = async () => {
+            try {
+                const [userAchievements, allAchievements] = await Promise.all([
+                    axios.get('/api/achievements'),
+                    axios.get('/api/achievements/all')
+                ]);
+                console.log('Fetched user achievements:', userAchievements.data);
+                console.log('All available achievements:', allAchievements.data);
+                console.log('Number of all achievements:', allAchievements.data.length);
+                setAchievements(userAchievements.data);
+            } catch (error) {
+                console.error('Error fetching achievements:', error);
+            }
+        };
+
+        if (user) {
+            fetchAchievements();
+        }
+    }, [user]);
+
+    useEffect(() => {
+        // Set active tab if provided in location state
+        if (location.state && location.state.activeTab) {
+            setActiveTab(location.state.activeTab);
+        }
+    }, [location]);
+
+    useEffect(() => {
+        const fetchUnreadCount = async () => {
+            try {
+                const response = await axios.get('/api/messages/unread-count');
+                // Assuming you have a way to update the notification count in the Header component
+                // This could be through a global state management solution or a callback passed down from App.js
+                if (typeof window.updateHeaderNotificationCount === 'function') {
+                    window.updateHeaderNotificationCount(response.data.count);
+                }
+            } catch (error) {
+                console.error('Error fetching unread message count:', error);
+            }
+        };
+
+        setUpdateNotificationCount(() => fetchUnreadCount);
+    }, []);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -63,7 +137,6 @@ const Profile = () => {
         setSuccess('');
 
         const formDataToSubmit = new FormData();
-        // Append the profile picture if it exists
         if (newProfilePicture) {
             formDataToSubmit.append('profilePicture', newProfilePicture);
         }
@@ -85,6 +158,8 @@ const Profile = () => {
                 dateOfBirth: formatDate(response.data.dateOfBirth)
             });
             setSuccess('Profile updated successfully!');
+            setPreview(''); // Clear the preview after successful upload
+            setNewProfilePicture(null); // Clear the selected file
         } catch (error) {
             console.error('Error updating profile:', error);
             setError('Failed to update profile. Please try again.');
@@ -115,13 +190,83 @@ const Profile = () => {
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
+            setNewProfilePicture(file);
             const reader = new FileReader();
             reader.onloadend = () => {
                 setPreview(reader.result);
-                setNewProfilePicture(file);
             };
             reader.readAsDataURL(file);
         }
+    };
+
+    const renderActivityItem = (activity) => {
+        switch (activity.type) {
+            case 'post':
+                return (
+                    <div className="activity-item">
+                        <PenTool size={16} />
+                        <span>Created a post: {activity.content}</span>
+                    </div>
+                );
+            case 'comment':
+                return (
+                    <div className="activity-item">
+                        <MessageSquare size={16} />
+                        <span>Commented on a post: {activity.content}</span>
+                    </div>
+                );
+            case 'poll':
+                return (
+                    <div className="activity-item">
+                        <Vote size={16} />
+                        <span>Created a poll: {activity.content}</span>
+                    </div>
+                );
+            case 'vote':
+                return (
+                    <div className="activity-item">
+                        <Vote size={16} />
+                        <span>Voted on a poll: {activity.content}</span>
+                    </div>
+                );
+            default:
+                return null;
+        }
+    };
+
+    const renderAchievements = () => {
+        const allAchievements = [
+            { name: 'First Post', icon: '📝', description: 'Create your first post' },
+            { name: 'Prolific Poster', icon: '✍️', description: 'Create 10 posts' },
+            { name: 'Power Poster', icon: '🚀', description: 'Create 50 posts' },
+            { name: 'Comment Contributor', icon: '💬', description: 'Leave your first comment' },
+            { name: 'Frequent Commenter', icon: '🗨️', description: 'Leave 10 comments' },
+            { name: 'Discussion Master', icon: '🏆', description: 'Leave 50 comments' },
+            { name: 'Poll Creator', icon: '📊', description: 'Create your first poll' },
+            { name: 'Active Voter', icon: '🗳️', description: 'Vote in 5 polls' },
+        ];
+
+        return (
+            <div className="achievements-section">
+                <h2>Achievements</h2>
+                <div className="achievements-list">
+                    {allAchievements.map((achievement) => {
+                        const userHasAchievement = achievements.some(a => a.name === achievement.name);
+                        return (
+                            <div key={achievement.name} className={`achievement-item ${userHasAchievement ? '' : 'achievement-locked'}`}>
+                                <div className="achievement-icon" role="img" aria-label={achievement.name}>
+                                    {achievement.icon}
+                                </div>
+                                <div className="achievement-info">
+                                    <h3>{achievement.name}</h3>
+                                    <p>{achievement.description}</p>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        );
     };
 
     if (!user) return <div className="loading">Loading...</div>;
@@ -167,10 +312,28 @@ const Profile = () => {
                     Profile Information
                 </button>
                 <button 
+                    className={`tab ${activeTab === 'activity' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('activity')}
+                >
+                    Activity Feed
+                </button>
+                <button 
                     className={`tab ${activeTab === 'password' ? 'active' : ''}`}
                     onClick={() => setActiveTab('password')}
                 >
                     Change Password
+                </button>
+                <button 
+                    className={`tab ${activeTab === 'achievements' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('achievements')}
+                >
+                    Achievements
+                </button>
+                <button 
+                    className={`tab ${activeTab === 'messaging' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('messaging')}
+                >
+                    Messaging
                 </button>
             </div>
 
@@ -240,6 +403,22 @@ const Profile = () => {
                     </form>
                 )}
 
+                {activeTab === 'activity' && (
+                    <div className="activity-feed">
+                        <h2>Recent Activity</h2>
+                        {activityFeed.length === 0 ? (
+                            <p>No recent activity.</p>
+                        ) : (
+                            activityFeed.map((activity, index) => (
+                                <div key={index} className="activity-item-container">
+                                    {renderActivityItem(activity)}
+                                    <span className="activity-date">{new Date(activity.date).toLocaleDateString()}</span>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                )}
+
                 {activeTab === 'password' && (
                     <form onSubmit={handlePasswordChange} className="password-form">
                         <div className="form-group">
@@ -278,6 +457,9 @@ const Profile = () => {
                         <button type="submit" className="submit-button">Change Password</button>
                     </form>
                 )}
+
+                {activeTab === 'achievements' && renderAchievements()}
+                {activeTab === 'messaging' && <Messaging userId={user._id} />}
             </div>
         </div>
     );

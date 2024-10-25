@@ -40,6 +40,14 @@ const UserSchema = new mongoose.Schema(
             facebook:String,
             instagram:String,
             linkedin:String
+        },
+        achievements: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Achievement'
+        }],
+        unreadMessageCount: {
+            type: Number,
+            default: 0
         }
     },
     {timestamps: true}

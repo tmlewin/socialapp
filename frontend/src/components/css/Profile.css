@@ -1,10 +1,14 @@
 .profile-container {
-    max-width: 800px;
-    margin: 40px auto;
+    max-width: 1600px;
+    width: 95%;
+    margin: 30px auto;
     padding: 30px;
     background-color: #ffffff;
     border-radius: 12px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    min-height: auto;
+    max-height: calc(100vh - 140px);
+    overflow-y: auto;
 }
 
 .profile-header {
@@ -177,4 +181,142 @@
 .edit-icon {
     color: white;
     cursor: pointer;
+}
+
+.activity-feed {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.activity-feed h2 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.activity-item-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #666;
+}
+
+.activity-date {
+    font-size: 0.8em;
+    color: #999;
+}
+
+.achievements-section {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.achievements-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.achievement-item {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.achievement-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.achievement-icon {
+    font-size: 36px;
+    margin-bottom: 10px;
+}
+
+.achievement-info h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #333;
+}
+
+.achievement-info p {
+    margin: 5px 0 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.achievement-locked {
+    opacity: 0.5;
+    filter: grayscale(100%);
+}
+
+.achievement-locked .achievement-info h3 {
+    color: #999;
+}
+
+.achievement-locked .achievement-info p {
+    color: #bbb;
+}
+
+.profile-content {
+    margin-top: 20px;
+    min-height: auto;
+    max-height: calc(100vh - 350px);
+    overflow-y: auto;
+}
+
+/* Update profile container for messaging tab */
+.profile-content:has(.messaging-container) {
+    margin: 15px -20px;
+    padding: 0 20px;
+    background: #fff;
+    max-height: none;
+}
+
+/* Add smooth scrollbar */
+.profile-container::-webkit-scrollbar,
+.profile-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.profile-container::-webkit-scrollbar-track,
+.profile-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.profile-container::-webkit-scrollbar-thumb,
+.profile-content::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+/* Adjust spacing for better vertical centering */
+@media (min-height: 800px) {
+    .profile-container {
+        margin: 40px auto;
+    }
+}
+
+@media (max-height: 700px) {
+    .profile-container {
+        margin: 20px auto;
+        max-height: calc(100vh - 100px);
+    }
 }

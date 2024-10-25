@@ -6,6 +6,33 @@
 
 .feed .search-bar {
     margin-bottom: 30px;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid transparent;
+    border-radius: 24px;
+    padding: 10px 15px;
+    box-shadow: none;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.feed .search-bar:focus-within {
+    background-color: #ffffff;
+    border-color: #e0e0e0;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.feed .search-bar input {
+    background-color: transparent;
+    color: #333;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 16px;
+}
+
+.feed .search-bar:focus-within input {
+    background-color: #ffffff;
 }
 
 .loading-spinner {

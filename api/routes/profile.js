@@ -11,7 +11,7 @@ const Post = require('../models/Post'); // Assuming Post model is defined elsewh
 // Get user profile
 router.get('/profile', auth, async (req, res) => {
     try {
-        const user = await User.findById(req.user.id).select('-password')
+        const user = await User.findById(req.user.id).select('-password').populate('achievements');
         if (!user) {
             return res.status(404).json({ message: 'User not found' })
         }

@@ -1,32 +1,64 @@
 .search-bar {
     display: flex;
     align-items: center;
-    background-color: #f0f2f5;
+    background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent background */
+    border: 1px solid #e0e0e0;
     border-radius: 24px;
-    padding: 8px 16px;
-    margin-bottom: 20px;
-    transition: background-color 0.3s ease;
+    padding: 10px 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
+.search-bar:hover,
 .search-bar:focus-within {
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 .search-icon {
-    color: #65676b;
-    margin-right: 8px;
+    color: #999;
+    margin-right: 10px;
 }
 
 .search-bar input {
-    flex-grow: 1;
-    background: none;
     border: none;
-    font-size: 16px;
     outline: none;
-    color: #050505;
+    font-size: 16px;
+    color: #333;
+    flex-grow: 1;
+    background-color: transparent; /* Make input background transparent */
+    transition: background-color 0.3s ease;
+}
+
+.search-bar:focus-within input {
+    background-color: #ffffff; /* White background when focused */
 }
 
 .search-bar input::placeholder {
-    color: #65676b;
+    color: #999;
+}
+
+.search-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-button svg {
+    color: #999;
+    transition: color 0.3s ease;
+}
+
+.search-button:hover svg {
+    color: #666;
+}
+
+@media (max-width: 600px) {
+    .search-bar {
+        max-width: 100%;
+    }
 }
