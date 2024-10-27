@@ -40,7 +40,6 @@ export default function Header({ onLogout }) {
                 <h1>Socially Social</h1>
                 <nav>
                     <Link to="/">Home</Link>
-                    <Link to="/forum">Forum</Link>
                     <Link to="/threads">Threads</Link>
                     <Link to="/profile">Profile</Link>
                     <Link to="/dashboard">Dashboard</Link>

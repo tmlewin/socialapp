@@ -7,7 +7,6 @@ import Header from './components/Header';
 import AuthForm from './components/AuthForm';
 import Profile from './components/Profile';
 import ThreadsPage from './components/ThreadsPage';
-import ForumPage from './components/ForumPage';
 import { updateContext } from './context/updateContext';
 import ThreadView from './components/ThreadView';
 import Dashboard from './components/Dashboard';
@@ -56,8 +55,7 @@ function App() {
                                     <Route path="/" element={<Feed />} />
                                     <Route path="/profile" element={<Profile />} />
                                     <Route path="/threads" element={<ThreadsPage />} />
-                                    <Route path="/forum" element={<ForumPage />} />
-                                    <Route path="/thread/:threadId" element={<ThreadView />} />
+                                   <Route path="/thread/:threadId" element={<ThreadView />} />
                                     <Route path="/dashboard" element={<Dashboard />} />
                                     <Route path="/polls" element={<PollsPage />} />
                                     <Route path="/polls/:pollId" element={<PollView />} />

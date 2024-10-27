@@ -8,8 +8,17 @@ const User = require('../models/User');
 // Get all threads
 router.get('/', async (req, res) => {
     try {
-        const threads = await Thread.find().sort({ createdAt: -1 });
-        res.status(200).json(threads);
+        const threads = await Thread.find()
+            .populate('userId', 'profilePicture') // Add this line to populate user data
+            .sort({ createdAt: -1 });
+
+        // Map through threads to ensure userProfilePicture is set
+        const threadsWithProfiles = threads.map(thread => ({
+            ...thread._doc,
+            userProfilePicture: thread.userId?.profilePicture || thread.userProfilePicture || "https://via.placeholder.com/40"
+        }));
+
+        res.status(200).json(threadsWithProfiles);
     } catch (err) {
         res.status(500).json({ message: 'Error fetching threads', error: err.message });
     }
@@ -30,10 +39,18 @@ router.post('/', auth, async (req, res) => {
             title,
             userId,
             user: user.username,
+            userProfilePicture: user.profilePicture || "https://via.placeholder.com/40" // Ensure default is set
         });
 
         const savedThread = await newThread.save();
-        res.status(201).json(savedThread);
+        
+        // Return the thread with all necessary user information
+        const threadWithProfile = {
+            ...savedThread._doc,
+            userProfilePicture: user.profilePicture || "https://via.placeholder.com/40"
+        };
+
+        res.status(201).json(threadWithProfile);
     } catch (err) {
         console.error('Error creating thread:', err);
         res.status(500).json({ message: 'Error creating thread', error: err.message });

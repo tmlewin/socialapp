@@ -103,7 +103,9 @@ export default function Feed() {
 
     return (
         <div className="feed">
-            <SearchBar onSearch={handleSearch} />
+            <div className="feed-search-wrapper">
+                <SearchBar onSearch={handleSearch} />
+            </div>
             {filteredPosts.map(post => (
                 <Post 
                     key={post._id} 

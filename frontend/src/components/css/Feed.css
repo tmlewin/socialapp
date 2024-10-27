@@ -4,15 +4,24 @@
     padding: 20px;
 }
 
-.feed .search-bar {
-    margin-bottom: 30px;
+/* Add this wrapper class for the search bar in feed */
+.feed-search-wrapper {
     width: 100%;
+    margin-bottom: 20px;
+    /* Remove any max-width here to match feed width */
+}
+
+/* Override any SearchBar component styles specifically for feed */
+.feed .search-bar {
+    width: 100%;
+    max-width: none; /* Remove max-width constraint */
+    margin: 0 0 30px 0; /* Adjust margin to only bottom */
     background-color: rgba(255, 255, 255, 0.1);
     border: 1px solid transparent;
     border-radius: 24px;
     padding: 10px 15px;
     box-shadow: none;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .feed .search-bar:focus-within {
@@ -24,15 +33,10 @@
 .feed .search-bar input {
     background-color: transparent;
     color: #333;
-    transition: background-color 0.3s ease;
     width: 100%;
     border: none;
     outline: none;
     font-size: 16px;
-}
-
-.feed .search-bar:focus-within input {
-    background-color: #ffffff;
 }
 
 .loading-spinner {

@@ -103,7 +103,9 @@
     background-color: #f8f9fa;
     border-radius: 4px;
     padding: 5px 10px;
-    width: 220px;
+    width: 180px; /* Reduced width */
+    max-width: 280px; /* Added max-width constraint */
+    margin-left: auto;
 }
 
 .search-bar input {
@@ -112,6 +114,7 @@
     font-size: 14px;
     width: 100%;
     margin-right: 10px;
+    outline: none;
 }
 
 .search-bar svg {
@@ -1065,3 +1068,214 @@
     overflow-wrap: break-word;
 }
 
+/* Add these styles for the attachment section */
+.attachment-section {
+    margin: 20px 0;
+    padding: 15px;
+    border: 2px dashed #e0e0e0;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+.attachment-section:hover {
+    border-color: #2563EB;
+    background-color: #f0f7ff;
+}
+
+.attachment-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    color: #374151;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.attachment-btn:hover {
+    background-color: #f3f4f6;
+    border-color: #2563EB;
+    color: #2563EB;
+}
+
+/* File preview styles */
+.attachment-preview {
+    margin-top: 16px;
+    padding: 12px;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Image preview */
+.attachment-preview img {
+    max-width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    border-radius: 4px;
+    margin: 8px 0;
+}
+
+/* File preview */
+.file-preview {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    gap: 12px;
+}
+
+.file-preview-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0; /* Enable text truncation */
+}
+
+.file-preview-info span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #374151;
+    font-size: 14px;
+}
+
+/* Remove button */
+.remove-attachment {
+    padding: 6px;
+    background-color: #fee2e2;
+    border: none;
+    border-radius: 4px;
+    color: #dc2626;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.remove-attachment:hover {
+    background-color: #fecaca;
+}
+
+/* Attachment icon styles */
+.attachment-icon {
+    color: #6b7280;
+    flex-shrink: 0;
+}
+
+/* File type badge */
+.file-type-badge {
+    padding: 2px 8px;
+    background-color: #e5e7eb;
+    border-radius: 12px;
+    font-size: 12px;
+    color: #374151;
+    text-transform: uppercase;
+}
+
+/* Add or update these styles for the reply modal attachments */
+.reply-modal .attachment-section {
+    margin: 20px 0;
+    padding: 15px;
+    border: 2px dashed #e0e0e0;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+.reply-modal .attachment-preview {
+    margin-top: 16px;
+    padding: 12px;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Image preview in reply modal */
+.reply-modal .attachment-preview img {
+    max-width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    border-radius: 4px;
+    margin: 8px 0;
+}
+
+/* File preview in reply modal */
+.reply-modal .file-preview {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    gap: 12px;
+}
+
+.reply-modal .file-preview-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
+.reply-modal .file-preview-info span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #374151;
+    font-size: 14px;
+}
+
+.reply-modal .remove-attachment {
+    padding: 6px;
+    background-color: #fee2e2;
+    border: none;
+    border-radius: 4px;
+    color: #dc2626;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.reply-modal .remove-attachment:hover {
+    background-color: #fecaca;
+}
+
+/* Attachment button in reply modal */
+.reply-modal .attachment-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    color: #374151;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.reply-modal .attachment-btn:hover {
+    background-color: #f3f4f6;
+    border-color: #2563EB;
+    color: #2563EB;
+}

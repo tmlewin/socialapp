@@ -3,6 +3,7 @@ import { Inbox, Send, Trash2, Edit, Search, Star, X, Paperclip, File, Archive } 
 import './css/Messaging.css';
 import axios from '../axios';
 import { useNotification } from '../context/NotificationContext';
+import SearchBar from './SearchBar';
 
 const Messaging = ({ userId }) => {
     const { updateUnreadCount } = useNotification();
@@ -391,6 +392,37 @@ const Messaging = ({ userId }) => {
 
     const renderReplyModal = () => {
         if (!showReplyModal || !selectedMessage) return null;
+
+        const renderAttachmentPreview = () => {
+            if (!replyMessage.attachment) return null;
+
+            const isImage = replyMessage.attachment.type.startsWith('image/');
+            return (
+                <div className="attachment-preview">
+                    {isImage ? (
+                        <img 
+                            src={URL.createObjectURL(replyMessage.attachment)} 
+                            alt="Attachment preview" 
+                        />
+                    ) : (
+                        <div className="file-preview">
+                            <div className="file-preview-info">
+                                <File size={24} />
+                                <span>{replyMessage.attachment.name}</span>
+                            </div>
+                        </div>
+                    )}
+                    <button 
+                        className="remove-attachment"
+                        onClick={() => setReplyMessage(prev => ({ ...prev, attachment: null }))}
+                    >
+                        <X size={16} />
+                        Remove
+                    </button>
+                </div>
+            );
+        };
+
         return (
             <div className="reply-modal">
                 <div className="reply-content">
@@ -425,15 +457,7 @@ const Messaging = ({ userId }) => {
                                 }}
                                 style={{ display: 'none' }}
                             />
-                            {replyMessage.attachment && (
-                                <div className="attachment-preview">
-                                    <File size={24} />
-                                    <span>{replyMessage.attachment.name}</span>
-                                    <button onClick={() => setReplyMessage(prev => ({ ...prev, attachment: null }))}>
-                                        Remove
-                                    </button>
-                                </div>
-                            )}
+                            {renderAttachmentPreview()}
                         </div>
                         <button onClick={handleReplySubmit} className="send-btn">Send Reply</button>
                     </div>
@@ -574,15 +598,10 @@ const Messaging = ({ userId }) => {
             <div className="messaging-content">
                 <div className="messaging-header">
                     <h2>{activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1)}</h2>
-                    <div className="search-bar">
-                        <input 
-                            type="text" 
-                            placeholder="Search messages..." 
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <Search size={18} />
-                    </div>
+                    <SearchBar 
+                        onSearch={(term) => setSearchTerm(term)} 
+                        className="messaging-search" 
+                    />
                 </div>
                 <div className="message-list-container">
                     <div className="message-list">

@@ -1,12 +1,13 @@
 .search-bar {
+    width: 100%;
     display: flex;
     align-items: center;
-    background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent background */
+    background-color: rgba(255, 255, 255, 0.1);
     border: 1px solid #e0e0e0;
     border-radius: 24px;
     padding: 10px 15px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .search-bar:hover,
@@ -61,4 +62,11 @@
     .search-bar {
         max-width: 100%;
     }
+}
+
+/* Add specific class for messaging search */
+.messaging-search {
+    width: 180px;
+    max-width: 180px;
+    margin: 0;
 }
