@@ -58,12 +58,30 @@ router.post('/', auth, async (req, res) => {
 });
 
 // Get a specific thread
-router.get('/:id', async (req, res) => {
+router.get('/:id', auth, async (req, res) => {
     try {
         const thread = await Thread.findById(req.params.id);
         if (!thread) {
             return res.status(404).json({ message: 'Thread not found' });
         }
+
+        // Mark thread as read without updating lastActivity
+        const readEntry = thread.readBy.find(read => 
+            read.userId.toString() === req.user.id
+        );
+        
+        if (!readEntry) {
+            // Use findByIdAndUpdate to avoid triggering the pre-save hook
+            await Thread.findByIdAndUpdate(thread._id, {
+                $push: {
+                    readBy: {
+                        userId: req.user.id,
+                        readAt: new Date()
+                    }
+                }
+            }, { new: true });
+        }
+
         res.status(200).json(thread);
     } catch (err) {
         res.status(500).json({ message: 'Error fetching thread', error: err.message });

@@ -87,25 +87,38 @@
 
 .thread-status-indicators {
     display: flex;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
+    gap: 8px;
+    align-items: center;
 }
 
 .status {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
     font-weight: 500;
 }
 
+.status.unread {
+    background-color: #2563EB;
+    color: white;
+}
+
 .status.locked {
-    background-color: #FEE2E2;
-    color: #DC2626;
+    background-color: #EF4444;
+    color: white;
 }
 
 .status.pinned {
-    background-color: #DBEAFE;
-    color: #2563EB;
+    background-color: #10B981;
+    color: white;
+}
+
+.status.solved {
+    background-color: #059669;
+    color: white;
 }
 
 .thread-actions {
@@ -130,6 +143,19 @@
 
 .bookmark {
     margin-left: auto;
+}
+
+.thread-last-activity {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #6B7280;
+    font-size: 12px;
+    margin-top: 8px;
+}
+
+.thread-card.unread {
+    border-left: 3px solid #2563EB;
 }
 
 @media (max-width: 640px) {

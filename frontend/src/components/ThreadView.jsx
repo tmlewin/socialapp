@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from '../axios';
 import Post from './Post';
 import CreatePost from './CreatePost';
@@ -12,6 +12,7 @@ const ThreadView = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const { threadId } = useParams();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchThreadAndPosts = async () => {
@@ -22,6 +23,11 @@ const ThreadView = () => {
                 ]);
                 setThread(threadResponse.data);
                 setPosts(postsResponse.data);
+                
+                // Trigger thread list refresh in ThreadsPage
+                const event = new CustomEvent('threadRead', { detail: threadId });
+                window.dispatchEvent(event);
+                
                 setLoading(false);
             } catch (err) {
                 console.error('Error fetching thread and posts:', err);

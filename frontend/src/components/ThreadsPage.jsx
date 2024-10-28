@@ -20,6 +20,17 @@ const ThreadsPage = () => {
 
     useEffect(() => {
         fetchThreads();
+
+        // Listen for thread read events
+        const handleThreadRead = () => {
+            fetchThreads(); // Refresh the threads list
+        };
+        
+        window.addEventListener('threadRead', handleThreadRead);
+        
+        return () => {
+            window.removeEventListener('threadRead', handleThreadRead);
+        };
     }, []);
 
     useEffect(() => {

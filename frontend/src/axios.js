@@ -10,6 +10,16 @@ instance.interceptors.request.use(
         const token = localStorage.getItem('token');
         if (token) {
             config.headers['Authorization'] = `Bearer ${token}`;
+            
+            // Decode token to get userId and store it
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const payload = JSON.parse(window.atob(base64));
+                localStorage.setItem('userId', payload.id);
+            } catch (error) {
+                console.error('Error decoding token:', error);
+            }
         }
         return config;
     },
@@ -27,8 +37,9 @@ instance.interceptors.response.use(
     (error) => {
         console.error('Axios response error:', error);
         if (error.response && error.response.status === 401) {
-            // Clear token and user data from localStorage
+            // Clear token, userId and user data from localStorage
             localStorage.removeItem('token');
+            localStorage.removeItem('userId');
             localStorage.removeItem('user');
             // Redirect to login page
             window.location.href = '/login';

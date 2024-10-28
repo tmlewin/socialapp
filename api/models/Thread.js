@@ -37,10 +37,32 @@ const ThreadSchema = new mongoose.Schema(
         },
         lastActivity: {
             type: Date,
-            default: Date.now
-        }
+            default: function() {
+                return this.createdAt || new Date();
+            }
+        },
+        isSolved: {
+            type: Boolean,
+            default: false
+        },
+        readBy: [{
+            userId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'User'
+            },
+            readAt: {
+                type: Date,
+                default: Date.now
+            }
+        }]
     },
     { timestamps: true }
 );
+
+// Add this method to update lastActivity explicitly
+ThreadSchema.methods.updateLastActivity = function() {
+    this.lastActivity = new Date();
+    return this.save();
+};
 
 module.exports = mongoose.model("Thread", ThreadSchema);

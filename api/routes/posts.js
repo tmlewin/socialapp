@@ -93,13 +93,13 @@ router.get('/search', async (req, res) => {
 });
 
 // Create a new post
-router.post('/', auth, (req, res) => {
-    upload(req, res, async (err) => {
-        if (err) {
-            return res.status(400).json({ message: err.message });
-        }
+router.post('/', auth, async (req, res) => {
+    try {
+        upload(req, res, async (err) => {
+            if (err) {
+                return res.status(400).json({ message: err.message });
+            }
 
-        try {
             const user = await User.findById(req.user.id);
             const newPost = new Post({
                 threadId: req.body.threadId,
@@ -113,18 +113,21 @@ router.post('/', auth, (req, res) => {
 
             const savedPost = await newPost.save();
 
-            // Increment the post count for the thread
-            await Thread.findByIdAndUpdate(req.body.threadId, { $inc: { postCount: 1 } });
+            // Update thread's lastActivity and postCount
+            await Thread.findByIdAndUpdate(req.body.threadId, {
+                $set: { lastActivity: new Date() },
+                $inc: { postCount: 1 }  // Restored the postCount increment
+            });
 
             // Check and award achievements
             const updatedAchievements = await checkAndAwardAchievements(user._id);
 
             res.status(200).json({ post: savedPost, achievements: updatedAchievements });
-        } catch (err) {
-            console.error('Error creating post:', err);
-            res.status(500).json({ message: 'Error creating post', error: err.message });
-        }
-    });
+        });
+    } catch (err) {
+        console.error('Error creating post:', err);
+        res.status(500).json({ message: 'Error creating post', error: err.message });
+    }
 });
 
 // Update a post
@@ -228,6 +231,11 @@ router.post('/:id/comments', auth, async (req, res) => {
         const savedComment = await newComment.save();
         post.comments.push(savedComment._id);
         await post.save();
+
+        // Update thread's lastActivity when a comment is added
+        await Thread.findByIdAndUpdate(post.threadId, {
+            $set: { lastActivity: new Date() }
+        });
 
         // Check and award achievements
         const updatedAchievements = await checkAndAwardAchievements(req.user.id);
