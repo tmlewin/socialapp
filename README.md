@@ -378,6 +378,7 @@ npm run build
 ![Achievement system showing various user accomplishments](./screenshots/achievement.JPG)
 *Gamified achievement system tracking user milestones and contributions*
 
+
 ## License
 
 This project is licensed under the ISC License.
@@ -402,5 +403,6 @@ This project is licensed under the ISC License - see the LICENSE file for detail
 - All contributors who have helped shape this project
 
 ---
+
 
 For more information or support, please open an issue in the repository.
