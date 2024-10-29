@@ -383,11 +383,11 @@ npm run build
 *Comprehensive analytics dashboard with user statistics, weekly activity graphs, and top performing posts*
 
 ### Polling System
-![Polling interface showing creation and voting options](./screenshots/polls.JPG)
+![Polling interface showing creation and voting options](./screenshots/polls.jpg)
 *Interactive polling system with real-time voting and multiple choice options*
 
 ### Poll Sharing
-![Poll sharing interface with social media options](./screenshots/pollshare.JPG)
+![Poll sharing interface with social media options](./screenshots/pollshare.jpg)
 *Built-in social sharing capabilities for polls with Twitter and Facebook integration*
 
 
