@@ -1,6 +1,6 @@
 # Author: Thomas Eruchie
 
-# Electronic News Platform
+# Technology News Platform
 
 A full-featured social media platform built with React.js and Node.js, featuring real-time messaging, polls, achievements, and more.
 
