@@ -378,6 +378,18 @@ npm run build
 ![Achievement system showing various user accomplishments](./screenshots/achievement.JPG)
 *Gamified achievement system tracking user milestones and contributions*
 
+### Dashboard Analytics
+![Dashboard showing user statistics and activity metrics](./screenshots/dashboard.JPG)
+*Comprehensive analytics dashboard with user statistics, weekly activity graphs, and top performing posts*
+
+### Polling System
+![Polling interface showing creation and voting options](./screenshots/polls.JPG)
+*Interactive polling system with real-time voting and multiple choice options*
+
+### Poll Sharing
+![Poll sharing interface with social media options](./screenshots/pollshare.JPG)
+*Built-in social sharing capabilities for polls with Twitter and Facebook integration*
+
 
 ## License
 
